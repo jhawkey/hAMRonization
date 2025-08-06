@@ -42,7 +42,7 @@ class AmrFinderPlusIterator(hAMRonizedResultIterator):
         "Closest reference name": None,
         "HMM accession": None,
         "HMM description": None,
-        "Hierarchy node": None,
+        "Hierarchy node": "gene_reference_id",
         # Fields we compute below (not in TSV)
         "amino_acid_mutation": "amino_acid_mutation",
         "nucleotide_mutation": "nucleotide_mutation",

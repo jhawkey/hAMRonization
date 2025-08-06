@@ -23,6 +23,7 @@ class hAMRonizedResult:
     genetic_variation_type: str
 
     # optional fields
+    gene_reference_id: str = None
     antimicrobial_agent: str = None
     coverage_percentage: float = None
     coverage_depth: float = None
