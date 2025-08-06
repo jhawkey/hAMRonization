@@ -8,6 +8,7 @@ from hAMRonization.constants import (
     NUCLEOTIDE_VARIANT,
     AMINO_ACID_VARIANT,
     GENE_PRESENCE,
+    aa_conversion
 )
 
 required_metadata = [
@@ -106,7 +107,11 @@ class AmrFinderPlusIterator(hAMRonizedResultIterator):
                 _, ref, pos, alt, _ = re.split(r"(\D+)(\d+)(\D+)", mutation)
                 # this means it is a protein mutation
                 if result['Method'] in ["POINTX", "POINTP"]:
-                    result['amino_acid_mutation'] = f"p.{ref}{pos}{alt}"
+                    # convert single letter to three letter code
+                    ref3 = aa_conversion.get(ref)
+                    alt3 = aa_conversion.get(alt)
+                    # set the genetic variation type
+                    result['amino_acid_mutation'] = f"p.{ref3}{pos}{alt3}"
                     result['genetic_variation_type'] = AMINO_ACID_VARIANT
                 elif result['Method'] == "POINTN":
                     # e.g., 23S_G2032G ampC_C-11C -> c.2032G>G
