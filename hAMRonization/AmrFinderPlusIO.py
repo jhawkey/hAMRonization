@@ -10,6 +10,7 @@ from hAMRonization.constants import (
     GENE_PRESENCE,
     INACTIVATING_VARIANT,
     PROMOTER_VARIANT,
+    INACTIVATING_VARIANT_PARTIAL,
     aa_conversion
 )
 
@@ -121,14 +122,6 @@ class AmrFinderPlusIterator(hAMRonizedResultIterator):
             if result.get("Type") == "VIRULENCE":
                 continue
 
-            # AFP reports partial hits so to avoid misleadingly listing these
-            # as present skip results with INTERNAL_STOP
-            # recommended by developers
-            #TODO: probably need to change this to work with AMRrules
-            if "INTERNAL_STOP" in result.get('Method', ''):
-                skipped_truncated += 1
-                continue
-
             # "POINT" indicates mutational resistance
             # amrfinderplus has no special fields but the mutation itself is
             # appended to the symbol name so we want to split this
@@ -136,25 +129,21 @@ class AmrFinderPlusIterator(hAMRonizedResultIterator):
             result['nucleotide_mutation'] = None
             result['genetic_variation_type'] = GENE_PRESENCE
 
-            if result.get("Subtype") == "POINT":
+            if result.get("Subtype").startswith("POINT"):
                 # get the mutation type if there is one
                 self._parse_mutation(result)
-            #    value_in_symbol = result.get("Element symbol")
-            #    gene_symbol, mutation = value_in_symbol.rsplit("_", 1)
-            #    result["Element symbol"] = gene_symbol
-            #    _, ref, pos, alt, _ = re.split(r"(\D+)(\d+)(\D+)", mutation)
-                # this means it is a protein mutation
-            #    if result["Method"] in ["POINTX", "POINTP"]:
-                    # convert single letter to three letter code
-            #        ref3 = aa_conversion.get(ref)
-            #        alt3 = aa_conversion.get(alt)
-                    # set the genetic variation type
-            #        result['amino_acid_mutation'] = f"p.{ref3}{pos}{alt3}"
-            #        result['genetic_variation_type'] = AMINO_ACID_VARIANT
-            #    elif result["Method"] == "POINTN":
-                    # e.g., 23S_G2032G ampC_C-11C -> c.2032G>G
-            #        result['nucleotide_mutation'] = f"c.{pos}{ref}>{alt}"
-            #        result['genetic_variation_type'] = NUCLEOTIDE_VARIANT
+
+            # no longer skipping internal stops, we want to
+            # report these as inactivating mutaations
+            if "INTERNAL_STOP" in result.get('Method', ''):
+                #skipped_truncated += 1
+                result['genetic_variation_type'] = INACTIVATING_VARIANT
+            # now we just have to work out what to do with partial hits...
+            # we want to keep these as inactivated variants, but we also
+            # need some way to record them as partial hits, as this will be
+            # important for interpretation
+            if result['Method'].startswith("PARTIAL"):
+                result['genetic_variation_type'] = INACTIVATING_VARIANT_PARTIAL
 
             # Determine the field_map to use depending on the method used
             # The following seems to cover all bases with a minimum of fuss
