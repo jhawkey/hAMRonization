@@ -213,11 +213,20 @@ def generate_tool_subparser(subparser, analysis_tool):
     # any missing mandatory fields need supplied as CLI argument
     required_mandatory_metadata = hAMRonization._RequiredToolMetadata[analysis_tool]
     for field in required_mandatory_metadata:
-        tool_parser.add_argument(
-            f"--{field}",
-            required=True,
-            help=f"Input string containing the {field} " f"for {analysis_tool}",
-        )
+        # Special handling for amrfinderplus input_file_name
+        if analysis_tool == "amrfinderplus" and field == "input_file_name":
+            tool_parser.add_argument(
+                f"--{field}",
+                required=True,
+                help=f"Input string containing the {field} for {analysis_tool}. "
+                     f"Use 'useName' to extract sample names from the 'Name' column in the input file.",
+            )
+        else:
+            tool_parser.add_argument(
+                f"--{field}",
+                required=True,
+                help=f"Input string containing the {field} " f"for {analysis_tool}",
+            )
     return subparser
 
 
