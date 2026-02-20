@@ -118,8 +118,8 @@ class AmrFinderPlusIterator(hAMRonizedResultIterator):
 
             self._apply_column_aliases(result)
 
-            # Skip reported virulence genes
-            if result.get("Type") == "VIRULENCE":
+            # Skip reported virulence and stress genes
+            if result.get("Type") == "VIRULENCE" or result.get("Type") == "STRESS":
                 continue
 
             # "POINT" indicates mutational resistance
